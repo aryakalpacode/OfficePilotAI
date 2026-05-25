@@ -1,0 +1,16 @@
+-keepattributes Signature, Exceptions, *Annotation*
+-keep class com.officepilot.ai.data.remote.dto.** { *; }
+-keep class com.officepilot.ai.data.local.entity.** { *; }
+-keep class com.google.gson.** { *; }
+-keep class org.apache.poi.** { *; }
+-keep class org.apache.xmlbeans.** { *; }
+-dontwarn org.apache.poi.**
+-dontwarn org.apache.xmlbeans.**
+-dontwarn org.openxmlformats.**
+-dontwarn org.etsi.**
+-dontwarn org.w3.**
+-dontwarn com.microsoft.**
+-dontwarn org.apache.batik.**
+-dontwarn de.rototor.**
+-dontwarn org.bouncycastle.**
+-keep class org.jsoup.** { *; }

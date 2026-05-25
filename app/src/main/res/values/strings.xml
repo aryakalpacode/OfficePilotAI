@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OfficePilot AI</string>
+    <string name="app_tagline">Your AI-Powered Office Secretary</string>
+
+    <string name="setup_welcome">Welcome to OfficePilot AI</string>
+    <string name="setup_desc">Create professional documents, analyze data, and automate your office work — all powered by free AI.</string>
+    <string name="api_key_gemini">Google Gemini API Key</string>
+    <string name="api_key_groq">Groq API Key (optional)</string>
+    <string name="api_key_hint">Paste your API key here</string>
+    <string name="get_gemini_key">Get Free Gemini Key</string>
+    <string name="get_groq_key">Get Free Groq Key</string>
+    <string name="test_key">Test</string>
+    <string name="save_continue">Save &amp; Continue</string>
+    <string name="key_valid">✓ Key valid</string>
+    <string name="key_invalid">✗ Invalid key</string>
+
+    <string name="home_greeting">What can I create for you?</string>
+    <string name="type_instruction">Describe what you need…</string>
+    <string name="send">Send</string>
+    <string name="stop">Stop</string>
+
+    <string name="output_pdf">PDF</string>
+    <string name="output_excel">Excel</string>
+    <string name="output_word">Word</string>
+    <string name="output_html">HTML</string>
+    <string name="output_csv">CSV</string>
+    <string name="output_zip">ZIP</string>
+
+    <string name="generating">Generating your document…</string>
+    <string name="thinking">Thinking…</string>
+    <string name="searching">Searching the web…</string>
+    <string name="fetching_images">Finding images…</string>
+    <string name="building_doc">Building document…</string>
+    <string name="done">Done!</string>
+    <string name="open_file">Open</string>
+    <string name="share_file">Share</string>
+    <string name="error_occurred">Something went wrong</string>
+    <string name="retry">Retry</string>
+    <string name="cancel">Cancel</string>
+    <string name="settings">Settings</string>
+    <string name="history">History</string>
+    <string name="files">My Files</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_files">Files</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="settings_api_keys">API Keys</string>
+    <string name="settings_default_format">Default Output Format</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_clear_history">Clear History</string>
+    <string name="settings_about">About OfficePilot AI v1.0</string>
+</resources>
