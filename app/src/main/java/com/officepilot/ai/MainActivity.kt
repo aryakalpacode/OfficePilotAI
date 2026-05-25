@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.officepilot.ai.data.repository.PrefsRepository
 import com.officepilot.ai.ui.screens.home.HomeScreen
+import com.officepilot.ai.ui.screens.markdown.MarkdownScreen
 import com.officepilot.ai.ui.screens.settings.SettingsScreen
 import com.officepilot.ai.ui.screens.setup.SetupScreen
 import com.officepilot.ai.ui.theme.OfficePilotTheme
@@ -35,7 +36,13 @@ class MainActivity : ComponentActivity() {
                         SetupScreen(onDone = { nav.navigate("home") { popUpTo("setup") { inclusive = true } } })
                     }
                     composable("home") {
-                        HomeScreen(onSettings = { nav.navigate("settings") })
+                        HomeScreen(
+                            onSettings = { nav.navigate("settings") },
+                            onMarkdownWorkshop = { nav.navigate("markdown") }
+                        )
+                    }
+                    composable("markdown") {
+                        MarkdownScreen(onBack = { nav.popBackStack() })
                     }
                     composable("settings") {
                         SettingsScreen(onBack = { nav.popBackStack() })

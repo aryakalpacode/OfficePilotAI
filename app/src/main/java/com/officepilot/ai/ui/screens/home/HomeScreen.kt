@@ -28,7 +28,11 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(vm: HomeViewModel = hiltViewModel(), onSettings: () -> Unit) {
+fun HomeScreen(
+    vm: HomeViewModel = hiltViewModel(),
+    onSettings: () -> Unit,
+    onMarkdownWorkshop: () -> Unit
+) {
     val s by vm.state.collectAsState()
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -51,6 +55,16 @@ fun HomeScreen(vm: HomeViewModel = hiltViewModel(), onSettings: () -> Unit) {
                     }
                 },
                 actions = {
+                    // Navigate to direct Markdown Editor & Style Customizer workshop
+                    FilledTonalButton(
+                        onClick = onMarkdownWorkshop,
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        modifier = Modifier.padding(end = 4.dp)
+                    ) {
+                        Icon(Icons.Default.Article, null, Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("MD Workshop", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
                     IconButton(vm::newSession) { Icon(Icons.Default.Add, "New") }
                     IconButton(onSettings) { Icon(Icons.Default.Settings, "Settings") }
                 }
@@ -81,7 +95,7 @@ fun HomeScreen(vm: HomeViewModel = hiltViewModel(), onSettings: () -> Unit) {
                                 Text("What can I create for you?", style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Spacer(Modifier.height(8.dp))
-                                Text("Try: \"Create a sales report with Q1 revenue $50K, Q2 $72K\"",
+                                Text("Try: \"Create a sales report with Q1 revenue \$50K, Q2 \$72K\"",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }

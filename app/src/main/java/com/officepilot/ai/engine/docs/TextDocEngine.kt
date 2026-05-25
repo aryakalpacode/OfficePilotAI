@@ -2,16 +2,19 @@ package com.officepilot.ai.engine.docs
 
 import android.content.Context
 import com.officepilot.ai.domain.model.DocSection
+import com.officepilot.ai.domain.model.DocStyleConfig
 import com.officepilot.ai.domain.model.DocumentPlan
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Handles CSV, HTML, Markdown, JSON, and ZIP output. */
+/** Handles CSV, HTML, Markdown, JSON, and ZIP output with custom styling configurations. */
 @Singleton
 class TextDocEngine @Inject constructor(@ApplicationContext private val ctx: Context) {
 
@@ -28,33 +31,64 @@ class TextDocEngine @Inject constructor(@ApplicationContext private val ctx: Con
         if (sb.isBlank()) {
             sb.appendLine("Title,${plan.title}")
             for (sec in plan.sections) {
-                if (sec.content.isNotBlank()) sb.appendLine("\"${sec.heading}\",\"${sec.content.take(500)}\"")
+                if (sec.content.isNotBlank()) sb.appendLine("\"${sec.heading}\",\"${sec.content.take(500).replace("\n", " ")}\"")
             }
         }
         return saveFile(plan.title, "csv", sb.toString())
     }
 
-    fun generateHtml(plan: DocumentPlan, images: Map<String, ByteArray> = emptyMap()): String {
+    fun generateHtml(
+        plan: DocumentPlan,
+        images: Map<String, ByteArray> = emptyMap(),
+        style: DocStyleConfig = DocStyleConfig()
+    ): String {
+        val primaryHex = style.primaryColorHex
+        val secondaryHex = style.secondaryColorHex
+        val textHex = style.textColorHex
+        val bgHex = style.backgroundColorHex
+        
+        val fontFamilyCss = when (style.fontFamily) {
+            "Serif" -> "Georgia, serif"
+            "Monospace" -> "Courier New, monospace"
+            else -> "Segoe UI, -apple-system, system-ui, sans-serif"
+        }
+
+        val paddingCss = when {
+            style.marginSize <= 35f -> "20px 10px"
+            style.marginSize >= 65f -> "60px 40px"
+            else -> "40px 20px"
+        }
+
         val sb = StringBuilder()
         sb.appendLine("""<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">""")
         sb.appendLine("""<title>${plan.title}</title><style>
-            body{font-family:Segoe UI,system-ui,sans-serif;max-width:900px;margin:0 auto;padding:40px 20px;color:#212121;line-height:1.7}
-            h1{color:#0d47a1;border-bottom:3px solid #1565c0;padding-bottom:12px}
-            h2{color:#1a237e;margin-top:30px}
-            table{width:100%;border-collapse:collapse;margin:20px 0;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-            th{background:#1565c0;color:#fff;padding:10px 14px;text-align:left}
-            td{padding:8px 14px;border-bottom:1px solid #e0e0e0}
-            tr:nth-child(even){background:#f5f5f5}
-            .meta{color:#757575;font-size:0.9em;margin-bottom:30px}
-            .chart-bar{display:flex;align-items:end;gap:8px;padding:20px;background:#fafafa;border-radius:8px;margin:20px 0}
-            .bar{background:linear-gradient(#1565c0,#0d47a1);border-radius:4px 4px 0 0;min-width:40px;text-align:center;color:#fff;font-size:0.8em;padding-top:4px}
-            .bar-label{text-align:center;font-size:0.8em;color:#616161;margin-top:4px}
-            img{max-width:100%;border-radius:8px;margin:15px 0}
-            ul,ol{padding-left:24px}
-            li{margin:4px 0}
+            body{font-family:$fontFamilyCss;max-width:900px;margin:0 auto;padding:$paddingCss;color:$textHex;background-color:$bgHex;line-height:${style.lineSpacing}}
+            h1{color:$primaryHex;border-bottom:3px solid $primaryHex;padding-bottom:12px;margin-bottom:8px}
+            h2{color:$primaryHex;margin-top:35px;border-left:4px solid $secondaryHex;padding-left:10px}
+            h3{color:$secondaryHex;margin-top:25px}
+            table{width:100%;border-collapse:collapse;margin:24px 0;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+            th{background:$primaryHex;color:#fff;padding:12px 16px;text-align:left;font-weight:600}
+            td{padding:10px 16px;border-bottom:1px solid #e2e8f0}
+            ${if (style.tableStyle == "Striped") "tr:nth-child(even){background:#f8fafc}" else ""}
+            .meta{color:#64748b;font-size:0.92em;margin-bottom:32px;font-style:italic}
+            blockquote{border-left:4px solid $primaryHex;background-color:#f8fafc;padding:12px 20px;margin:20px 0;color:#475569;font-style:italic;border-radius:0 6px 6px 0}
+            pre{background:#f1f5f9;color:#1e293b;padding:16px;border-radius:8px;overflow-x:auto;font-family:Courier New, monospace;font-size:0.95em;border:1px solid #e2e8f0}
+            code{font-family:Courier New, monospace;font-size:0.95em;background:#f1f5f9;padding:2px 6px;border-radius:4px;color:#0f172a}
+            pre code{background:transparent;padding:0;color:inherit;border-radius:0}
+            .chart-bar{display:flex;align-items:end;gap:12px;padding:24px;background:#f8fafc;border-radius:8px;margin:24px 0;border:1px solid #e2e8f0}
+            .bar{background:linear-gradient($primaryHex, $secondaryHex);border-radius:6px 6px 0 0;min-width:44px;text-align:center;color:#fff;font-size:0.8em;padding-top:4px}
+            .bar-label{text-align:center;font-size:0.8em;color:#64748b;margin-top:6px;font-weight:500}
+            img{max-width:100%;border-radius:8px;margin:20px 0;box-shadow:0 4px 6px rgba(0,0,0,.05)}
+            ul,ol{padding-left:24px;margin:16px 0}
+            li{margin:6px 0}
+            @media print {
+                body { padding: 0; background: #fff; }
+                .pagebreak { page-break-after: always; }
+            }
         </style></head><body>""")
+        
         sb.appendLine("<h1>${plan.title}</h1>")
-        val dateStr = java.text.SimpleDateFormat("MMMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date())
+        val dateStr = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date())
         sb.appendLine("""<p class="meta">Generated by OfficePilot AI • $dateStr</p>""")
 
         for (sec in plan.sections) {
@@ -75,6 +109,14 @@ class TextDocEngine @Inject constructor(@ApplicationContext private val ctx: Con
                     sec.content.split("\n").filter { it.isNotBlank() }.forEach { sb.appendLine("<li>${it.trim()}</li>") }
                     sb.appendLine("</ol>")
                 }
+                "quote" -> {
+                    if (sec.heading.isNotBlank()) sb.appendLine("<h2>${sec.heading}</h2>")
+                    sb.appendLine("<blockquote>${sec.content.replace("\n", "<br>")}</blockquote>")
+                }
+                "code" -> {
+                    if (sec.heading.isNotBlank()) sb.appendLine("<h2>${sec.heading}</h2>")
+                    sb.appendLine("<pre><code>${sec.content}</code></pre>")
+                }
                 "table" -> {
                     if (sec.heading.isNotBlank()) sb.appendLine("<h2>${sec.heading}</h2>")
                     sb.appendLine("<table>")
@@ -91,7 +133,7 @@ class TextDocEngine @Inject constructor(@ApplicationContext private val ctx: Con
                     val maxVal = sec.chartData.values.maxOrNull() ?: 1.0
                     sb.appendLine("""<div class="chart-bar" style="height:250px">""")
                     sec.chartData.forEach { (k, v) ->
-                        val h = (v / maxVal * 200).toInt()
+                        val h = (v / maxVal * 190).toInt()
                         sb.appendLine("""<div style="flex:1;text-align:center"><div class="bar" style="height:${h}px">${formatNum(v)}</div><div class="bar-label">$k</div></div>""")
                     }
                     sb.appendLine("</div>")
@@ -105,7 +147,7 @@ class TextDocEngine @Inject constructor(@ApplicationContext private val ctx: Con
                         sb.appendLine("""<img src="data:image/jpeg;base64,$b64" alt="${sec.heading}">""")
                     }
                 }
-                "pagebreak" -> sb.appendLine("""<div style="page-break-after:always"></div>""")
+                "pagebreak" -> sb.appendLine("""<div class="pagebreak"></div>""")
             }
         }
         sb.appendLine("</body></html>")
@@ -125,6 +167,22 @@ class TextDocEngine @Inject constructor(@ApplicationContext private val ctx: Con
                     if (sec.heading.isNotBlank()) sb.appendLine("## ${sec.heading}\n")
                     sec.content.split("\n").filter { it.isNotBlank() }.forEach { sb.appendLine("- ${it.trim()}") }
                     sb.appendLine()
+                }
+                "numbered_list" -> {
+                    if (sec.heading.isNotBlank()) sb.appendLine("## ${sec.heading}\n")
+                    sec.content.split("\n").filter { it.isNotBlank() }.forEachIndexed { idx, item -> sb.appendLine("${idx + 1}. ${item.trim()}") }
+                    sb.appendLine()
+                }
+                "quote" -> {
+                    if (sec.heading.isNotBlank()) sb.appendLine("## ${sec.heading}\n")
+                    sec.content.split("\n").forEach { sb.appendLine("> $it") }
+                    sb.appendLine()
+                }
+                "code" -> {
+                    if (sec.heading.isNotBlank()) sb.appendLine("## ${sec.heading}\n")
+                    sb.appendLine("```")
+                    sb.appendLine(sec.content)
+                    sb.appendLine("```\n")
                 }
                 "table" -> {
                     if (sec.heading.isNotBlank()) sb.appendLine("## ${sec.heading}\n")
@@ -164,7 +222,7 @@ class TextDocEngine @Inject constructor(@ApplicationContext private val ctx: Con
 
     private fun saveFile(title: String, ext: String, content: String): String {
         val dir = File(ctx.filesDir, "documents").apply { mkdirs() }
-        val name = "${title.replace(Regex("[^a-zA-Z0-9 ]"), "").replace(" ", "_").take(40)}.$ext"
+        val name = "${title.replace(Regex("[^a-zA-Z0-9 ]"), "").replace(" ", "_").take(30).ifBlank { "Document" }}.$ext"
         val file = File(dir, name)
         file.writeText(content)
         return file.absolutePath
