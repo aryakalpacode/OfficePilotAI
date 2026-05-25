@@ -172,7 +172,7 @@ class ExcelEngine @Inject constructor(@ApplicationContext private val ctx: Conte
     }
 
     private fun createFallbackSheet(wb: XSSFWorkbook, plan: JsonObject,
-                                     hs: CellStyle, ds: CellStyle, ns: CellStyle, as2: CellStyle) {
+                                     hs: org.apache.poi.xssf.usermodel.XSSFCellStyle, ds: org.apache.poi.xssf.usermodel.XSSFCellStyle, ns: org.apache.poi.xssf.usermodel.XSSFCellStyle, as2: org.apache.poi.xssf.usermodel.XSSFCellStyle) {
         val sheet = wb.createSheet("Data")
         val sections = plan.getAsJsonArray("sections") ?: return
         var rowNum = 0
